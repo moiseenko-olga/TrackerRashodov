@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% set page = "limits" %}
+{% block content %}
+
+<h1 class="page-title">⚙️ Лимиты по категориям</h1>
+<p class="page-sub">Установите месячный лимит для каждой категории</p>
+
+{% if msg %}
+<div class="msg msg-{{ msg[0] }}">{{ msg[1] }}</div>
+{% endif %}
+
+{% for item in data %}
+{% set bar = 'var(--red)' if item.pct >= 100 else 'var(--yellow)' if item.pct >= 80 else item.color %}
+<div class="limit-card">
+  <div class="limit-head">
+    <span class="limit-name">{{ item.name }}</span>
+    <span class="limit-info">{{ '{:,.0f}'.format(item.spent) }} ₽ / {{ '{:,.0f}'.format(item.lim) }} ₽  ({{ item.pct }}%)</span>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-fill" style="width:{{ item.pct }}%;background:{{ bar }};"></div>
+  </div>
+  <form class="limit-form" method="POST" action="/limits?year={{ year }}&month={{ month }}">
+    <input type="hidden" name="category" value="{{ item.name }}">
+    <input class="form-input" type="number" name="limit" value="{{ item.lim|int }}"
+           min="1" step="1" style="max-width:160px;">
+    <button class="btn btn-primary" type="submit">Сохранить</button>
+  </form>
+</div>
+{% endfor %}
+
+{% endblock %}

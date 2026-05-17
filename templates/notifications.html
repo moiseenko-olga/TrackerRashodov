@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% set page = "notifications" %}
+{% block content %}
+
+<h1 class="page-title">🔔 Уведомления</h1>
+<p class="page-sub">{{ month_name }} {{ year }}</p>
+
+{% for kind, icon, title, body in notifs %}
+{% set color = 'var(--red)' if kind == 'danger' else 'var(--yellow)' if kind == 'warn' else 'var(--green)' %}
+<div class="notif-card" style="border-color:{{ color }}">
+  <div class="notif-head">
+    <span class="notif-icon">{{ icon }}</span>
+    <span class="notif-title" style="color:{{ color }}">{{ title }}</span>
+  </div>
+  <div class="notif-body">{{ body }}</div>
+</div>
+{% endfor %}
+
+{% endblock %}

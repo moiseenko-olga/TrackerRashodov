@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% set page = "dashboard" %}
+{% block content %}
+
+<div class="page-header">
+  <h1 class="page-title">📊 Дашборд</h1>
+</div>
+<p class="page-sub">{{ month_name }} {{ year }}</p>
+
+<!-- Stat cards -->
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-label">ПОТРАЧЕНО В МЕСЯЦ</div>
+    <div class="stat-value" style="color: var(--text)">{{ '{:,.0f}'.format(total) }} ₽</div>
+    <div class="stat-sub">
+      {% if total_limit %}{{ (total / total_limit * 100)|int }}% от суммы лимитов{% else %}нет лимитов{% endif %}
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">ОСТАТОК ПО ЛИМИТАМ</div>
+    {% set rest = [0, total_limit - total]|max %}
+    <div class="stat-value" style="color: {% if total <= total_limit %}var(--green){% else %}var(--red){% endif %}">
+      {{ '{:,.0f}'.format(rest) }} ₽
+    </div>
+    <div class="stat-sub">Лимит: {{ '{:,.0f}'.format(total_limit) }} ₽</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">ТРАНЗАКЦИЙ</div>
+    <div class="stat-value" style="color: var(--accent)">{{ expenses_count }}</div>
+    <div class="stat-sub">за текущий месяц</div>
+  </div>
+</div>
+
+<!-- Over limit alerts -->
+{% if over_limit %}
+{% for name, spent, lim, pct in over_limit %}
+<div class="notif-card" style="border-color: {% if pct >= 100 %}var(--red){% else %}var(--yellow){% endif %}; margin-bottom: 8px;">
+  <div class="notif-head">
+    <span class="notif-icon">{% if pct >= 100 %}🚨{% else %}⚠️{% endif %}</span>
+    <span class="notif-title" style="color: {% if pct >= 100 %}var(--red){% else %}var(--yellow){% endif %}">
+      «{{ name }}» — {{ pct|int }}% лимита
+    </span>
+  </div>
+  <div class="notif-body">{{ '{:,.0f}'.format(spent) }} ₽ из {{ '{:,.0f}'.format(lim) }} ₽</div>
+</div>
+{% endfor %}
+{% endif %}
+
+<!-- Category breakdown -->
+{% if cats %}
+<p class="section-label">ПО КАТЕГОРИЯМ</p>
+<div class="cat-grid">
+{% for name, color, amount in cats %}
+{% set lim = limits.get(name, 5000) %}
+{% set pct = [100, (amount / lim * 100)|int]|min if lim else 0 %}
+{% set bar = 'var(--red)' if pct >= 100 else 'var(--yellow)' if pct >= 80 else color %}
+<div class="cat-card">
+  <div class="cat-card-top">
+    <div class="cat-card-dot" style="background:{{ color }};box-shadow:0 0 8px {{ color }}55;"></div>
+    <div class="cat-card-name">{{ name }}</div>
+    <div class="cat-card-amount" style="color:{{ color }}">{{ '{:,.0f}'.format(amount) }} ₽</div>
+  </div>
+  <div class="cat-card-bar">
+    <div class="progress-bar" style="height:5px;">
+      <div class="progress-fill" style="width:{{ pct }}%;background:{{ bar }};box-shadow:0 0 6px {{ bar }}88;"></div>
+    </div>
+  </div>
+  <div class="cat-card-bottom">
+    <span class="cat-card-sub">из {{ '{:,.0f}'.format(lim) }} ₽ лимита</span>
+    <span class="cat-card-pct" style="color:{{ bar }}">{{ pct }}%</span>
+  </div>
+</div>
+{% endfor %}
+</div>
+{% else %}
+<div class="empty">Нет расходов за этот месяц.<br><a href="/add" style="color:var(--accent)">Добавить первый →</a></div>
+{% endif %}
+
+<style>
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.cat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 20px;
+  transition: border-color .15s, background .15s;
+}
+.cat-card:hover {
+  background: var(--surface2);
+  border-color: var(--accent);
+}
+.cat-card-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.cat-card-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.cat-card-name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+}
+.cat-card-amount {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+}
+.cat-card-bar {
+  margin-bottom: 8px;
+}
+.cat-card-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.cat-card-sub {
+  font-size: 11px;
+  color: var(--text2);
+}
+.cat-card-pct {
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Unbounded', sans-serif;
+}
+</style>
+
+{% endblock %}

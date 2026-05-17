@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% set page = "report" %}
+{% block content %}
+
+<h1 class="page-title">📈 Ежемесячный отчёт</h1>
+<p class="page-sub">{{ month_name }} {{ year }}</p>
+
+<div class="card" style="padding:22px 24px; margin-bottom: 20px;">
+  <div style="font-size:15px;font-weight:600;margin-bottom:10px;">Отчёт за {{ month_name }} {{ year }}</div>
+  <div style="font-size:24px;font-family:'Unbounded',sans-serif;font-weight:700;color:var(--accent);margin-bottom:6px;">
+    {{ '{:,.0f}'.format(total) }} ₽
+  </div>
+  <div style="color:var(--text2);font-size:13px;">{{ expenses_count }} транзакций</div>
+</div>
+
+{% if cats %}
+<p class="section-label">РАЗБИВКА ПО КАТЕГОРИЯМ</p>
+<div class="card">
+{% for name, color, amount in cats %}
+{% set lim = limits.get(name, 5000) %}
+{% set pct_total = (amount / total * 100)|int if total else 0 %}
+<div class="cat-row">
+  <div style="width:10px;height:10px;border-radius:50%;background:{{ color }};flex-shrink:0;"></div>
+  <div class="cat-name">{{ name }}</div>
+  <div style="font-size:11px;color:var(--text2);min-width:100px;">{{ pct_total }}% от общей суммы</div>
+  <div class="cat-amount" style="color:{{ color }}">{{ '{:,.0f}'.format(amount) }} ₽</div>
+</div>
+{% endfor %}
+</div>
+{% endif %}
+
+{% if history %}
+<p class="section-label">ИСТОРИЯ ПО МЕСЯЦАМ</p>
+<div class="card">
+{% for mstr, htotal, hcount in history %}
+{% set parts = mstr.split('-') %}
+<div class="hist-row">
+  <div class="hist-month">{{ months_ru[parts[1]|int] }} {{ parts[0] }}</div>
+  <div class="hist-count">{{ hcount }} транзакций</div>
+  <div class="hist-amount">{{ '{:,.0f}'.format(htotal) }} ₽</div>
+</div>
+{% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}

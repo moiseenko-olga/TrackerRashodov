@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% set page = "expenses" %}
+{% block content %}
+
+<div class="page-header">
+  <h1 class="page-title">📋 Все расходы</h1>
+  <button class="btn btn-danger" onclick="deleteAll()">🗑 Удалить все</button>
+</div>
+<p class="page-sub">{{ month_name }} {{ year }} · {{ rows|length }} транзакций</p>
+
+{% if rows %}
+<div class="card" id="expense-list">
+{% for eid, amount, cat, color, desc, date in rows %}
+<div class="expense-row" id="row-{{ eid }}">
+  <div class="expense-dot" style="background:{{ color }}"></div>
+  <div class="expense-cat">{{ cat }}</div>
+  <div class="expense-desc">{{ desc if desc else '—' }}</div>
+  <div class="expense-date">{{ date }}</div>
+  <div class="expense-amount" style="color:{{ color }}">{{ '{:,.0f}'.format(amount) }} ₽</div>
+  <button class="btn-del" onclick="delExpense({{ eid }})" title="Удалить">🗑</button>
+</div>
+{% endfor %}
+</div>
+{% else %}
+<div class="empty">Нет расходов за этот период.</div>
+{% endif %}
+
+<script>
+function delExpense(id) {
+  if (!confirm('Удалить этот расход?')) return;
+  fetch('/api/delete/' + id, {method:'POST'})
+    .then(r => r.json())
+    .then(d => { if(d.ok) { document.getElementById('row-' + id).remove(); } });
+}
+
+function deleteAll() {
+  if (!confirm('Удалить ВСЕ расходы? Это нельзя отменить.')) return;
+  fetch('/api/delete_all', {method:'POST'})
+    .then(r => r.json())
+    .then(d => { if(d.ok) window.location.reload(); });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% set page = "add" %}
+{% block content %}
+
+<h1 class="page-title">➕ Добавить расход</h1>
+<p class="page-sub" style="margin-bottom:28px;">Новая транзакция</p>
+
+{% if msg %}
+<div class="msg msg-{{ msg[0] }}">{{ msg[1] }}</div>
+{% endif %}
+
+<div class="form-card">
+  <form method="POST" action="/add">
+
+    <div class="form-group">
+      <label class="form-label">СУММА (₽)</label>
+      <input class="form-input" type="number" name="amount" step="0.01" min="0.01"
+             placeholder="0.00" required autofocus>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">КАТЕГОРИЯ</label>
+      <select class="form-select" name="category">
+        {% for cat in categories %}
+        <option value="{{ cat }}">{{ cat }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">ОПИСАНИЕ</label>
+      <input class="form-input" type="text" name="description" placeholder="Необязательно">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">ДАТА</label>
+      <input class="form-input" type="date" name="date" value="{{ today }}" required>
+    </div>
+
+    <button class="btn btn-primary" type="submit" style="width:100%;justify-content:center;">
+      ➕ Добавить расход
+    </button>
+  </form>
+</div>
+
+{% endblock %}
